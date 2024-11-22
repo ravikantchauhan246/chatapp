@@ -2,8 +2,9 @@ package com.ravikant.chatapp.listener;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ravikant.chatapp.dto.ChatMessage;
+import com.ravikant.chatapp.model.ChatMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -12,9 +13,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class RedisMessageSubscriber  implements MessageListener {
 
-    private final RedisTemplate<String, String> redisTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
     private final ObjectMapper objectMapper;
     private final SimpMessageSendingOperations simpMessageSendingOperations;
 
@@ -28,7 +30,7 @@ public class RedisMessageSubscriber  implements MessageListener {
             ChatMessage chatMessage =  objectMapper.readValue(publishedMessage, ChatMessage.class);
             simpMessageSendingOperations.convertAndSend("/topic/public", chatMessage);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            log.error(e.getMessage());
         }
     }
 }

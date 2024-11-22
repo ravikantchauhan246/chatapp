@@ -1,13 +1,14 @@
 package com.ravikant.chatapp.listener;
 
-import com.ravikant.chatapp.dto.ChatMessage;
-import com.ravikant.chatapp.dto.MessageType;
+import com.ravikant.chatapp.model.ChatMessage;
+import com.ravikant.chatapp.model.MessageType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Component;
+import org.springframework.web.socket.messaging.SessionConnectedEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 @Component
@@ -16,6 +17,11 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 public class WebSocketEventListener {
     private final RedisTemplate<String, Object> redisTemplate;
+
+    @EventListener
+    public void handleWebSocketConnectListener(SessionConnectedEvent event) {
+        log.info("Received a new web socket connection");
+    }
 
     @EventListener
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {

@@ -1,10 +1,11 @@
 package com.ravikant.chatapp.controller;
 
-import com.ravikant.chatapp.dto.ChatMessage;
-import com.ravikant.chatapp.dto.MessageType;
+import com.ravikant.chatapp.model.ChatMessage;
+import com.ravikant.chatapp.model.MessageType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -18,17 +19,16 @@ import java.time.format.DateTimeFormatter;
 @Slf4j
 public class ChatController {
 
-    private final RedisTemplate redisTemplate;
+    private final RedisTemplate<String,Object> redisTemplate;
+    private final ChannelTopic channelTopic;
     
     //Send Message to the clients
     @MessageMapping("/chat.send")
     public ChatMessage sendChatMessage(@Payload ChatMessage chatMessage){
         chatMessage.setTimestamp(LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-
         //Add logic to send message to DragonflyDB Queue
-
-        redisTemplate.convertAndSend("chat", chatMessage);
-
+        log.info("Sending chat message from: {}", chatMessage.getUserName());
+        redisTemplate.convertAndSend(channelTopic.getTopic(), chatMessage);
         return chatMessage;
     }
     
@@ -43,7 +43,7 @@ public class ChatController {
         log.info("User joined: {}", chatMessage.getUserName());
 
         // Send the chat message back to the clients with Message Type as JOIN
-        redisTemplate.convertAndSend("chat", chatMessage);
+        redisTemplate.convertAndSend(channelTopic.getTopic(), chatMessage);
         return chatMessage;
     }
 }

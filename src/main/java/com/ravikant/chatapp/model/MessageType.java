@@ -1,4 +1,4 @@
-package com.ravikant.chatapp.dto;
+package com.ravikant.chatapp.model;
 
 public enum MessageType {
     CHAT,JOIN,LEAVE

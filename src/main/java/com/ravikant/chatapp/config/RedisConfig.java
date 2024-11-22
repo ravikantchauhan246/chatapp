@@ -1,6 +1,8 @@
 package com.ravikant.chatapp.config;
 
 import com.ravikant.chatapp.listener.RedisMessageSubscriber;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -12,13 +14,18 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
+@RequiredArgsConstructor
 public class RedisConfig {
 
+    @Value("${redis.topic:chat}")
+    private String topic;
+
     @Bean
-    public RedisMessageListenerContainer container(RedisConnectionFactory redisconnectionFactory, MessageListenerAdapter messageListenerAdapter) {
+    public RedisMessageListenerContainer redisMessageListenerContainer(RedisConnectionFactory redisConnectionFactory,
+                                                                       MessageListenerAdapter messageListenerAdapter) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
-        container.setConnectionFactory(redisconnectionFactory);
-        container.addMessageListener(messageListenerAdapter,  channelTopic());
+        container.setConnectionFactory(redisConnectionFactory);
+        container.addMessageListener(messageListenerAdapter, channelTopic());
         return container;
     }
 
@@ -27,15 +34,14 @@ public class RedisConfig {
         return new MessageListenerAdapter(redisMessageSubscriber);
     }
 
-
     @Bean
     public ChannelTopic channelTopic() {
-        return new ChannelTopic("chat");
+        return new ChannelTopic(topic);
     }
 
     @Bean
-    public RedisTemplate<String,Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
-        RedisTemplate<String,Object> template = new RedisTemplate<>();
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory);
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(new Jackson2JsonRedisSerializer<>(String.class));

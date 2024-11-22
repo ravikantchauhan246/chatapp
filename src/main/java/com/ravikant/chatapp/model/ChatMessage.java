@@ -1,10 +1,8 @@
-package com.ravikant.chatapp.dto;
+package com.ravikant.chatapp.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.awt.*;
 
 @Data
 @AllArgsConstructor
